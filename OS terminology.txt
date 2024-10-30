@@ -34,14 +34,26 @@ DATA TYPES AND SUCH:
 +---------------------+---------------------------------------------------------------+
 | pthread_t           | Thread identifier.                                            |
 +---------------------+---------------------------------------------------------------+
+pthread_cond_signal - wakes up a single thread waiting on a conditional variable. The 
+thread will have to test its predicate to see if it should awaken
+pthread_cond_broadcast - wakes up all threads waiting on the conditional variable. The 
+threads will have to test all their predicates so it could be slow
 
 PHOTOS: 
 
-[1] THREAD_STATE_TRANSITIONS : shows the various states a thread can be in and the actions that correspond with each state
+[1] THREAD_STATE_TRANSITIONS : shows the various states a thread can be in and the actions 
+that correspond with each state
 
-[2] MUTEX_OPERATIONS : we see 3 threads sharing a mutex lock, and the various states that they're in. 
+[2] MUTEX_OPERATIONS : we see 3 threads sharing a mutex lock, and the various states that 
+they're in. 
 
 [3] CONDITIONAL_VARIABLE_OPERATION : we see how threads work with a condition variable
+
+[4] CORRECT_AND_INCORRECT_MEMORY_VISIBILITY : 2 code examples of good and bad 
+	memory visibility.
+	
+[5] THREAD_PROGRAMMING_MODELS : shown are the most common ways to implement a threaded 
+	program. 
 
 DEFINITIONS:  
 
@@ -49,29 +61,45 @@ Amdahl's law - the ratio that shows the speed up associated with parallel proces
 
 Asynchronous - many things happen independently (concurrently) 
 
-Backoff Algorithm - To do with mutexes. If you need to lock multiple mutexes, but could only lock a subset of all required, then back off and unlock all of the mutexes, and try again
-	-You should always unlock mutexes in reverse order, simply to reduce the amount of steps needed in the "Backoff Algorithm" 
+Backoff Algorithm - To do with mutexes. If you need to lock multiple mutexes, but could 
+	only lock a subset of all required, then back off and unlock all of the mutexes, 
+	and try again.
 	
-Condition Variable - used for communicating information about the state of shared data. Use it to signal: 
-	(1) A queue is empty
-	(2) A queue is no longer empty, 
-	(3)
+	-You should always unlock mutexes in reverse order, simply to reduce the amount 
+	of steps needed in the "Backoff Algorithm" 
+
+Broadcasting - When a threads signals a conditon variable to multiple threads
 	
-Context switching - the caller function saves the current data of the process in a "context switcher" and performs any necessary synchronization. This is necessary when more than one thread has access to a specific region
+Condition Variable - used for communicating information about the state of shared data. 
+	Use it to signal: 
+		(1) A queue is empty
+		(2) A queue is no longer empty, 
+	
+Context switching - the caller function saves the current data of the process in a 
+	"context switcher" and performs any necessary synchronization. This is necessary 
+	when more than one thread has access to a specific region
 
 Concurrency control functions: 
-	(1)Preserving state of an object entity-- We need to be able to save the state of one context, be able to switch to another, and then switch back, all with the register contents in tact. 
-	(2)Scheduling -- Determines the sequence in which contexts will be executed, and switched to and from. 
+	(1)Preserving state of an object entity-- We need to be able to save the state of
+	one context, be able to switch to another, and then switch back, all with 
+	the register contents in tact. 
+	(2)Scheduling -- Determines the sequence in which contexts will be executed, and 
+	switched to and from. 
 	
-Conditional Variables - The must must always be locked when you are waiting on a condition variable, and when the thread wakes up from a condition variable wait, it always resumes with the mutex locked. 
+Conditional Variables - The must must always be locked when you are waiting on a condition 
+	variable, and when the thread wakes up from a condition variable wait, it always 
+	resumes with the mutex locked. 
+	
 	-conditional variables are for SIGNALING, not for MUTUAL EXCLUSION
-	-you must specify a mutex when you're waiting on a condition variable 
-	-
-
-Critical sections/Serial sections - we can break thread safe functions down into critical sections. This is the area where one one process should have access to it at a time to ensure data integrity. 
-
-
 	
+	-you must specify a mutex when you're waiting on a condition variable 
+	
+	-you can declare a conditional variable either as static or dynamic
+
+Critical sections/Serial sections - we can break thread safe functions down into critical 
+	sections. This is the area where one one process should have access to it at a 
+	time to ensure data integrity. 
+
 Mutex DeadLock -  
 +----------------------+----------------------+
 |      First thread    |     Second thread    |
@@ -84,70 +112,128 @@ Mutex DeadLock -
 +----------------------+----------------------+
 
 	-Deadlock Solutions: 
-		(1) Fixed lock hierarchy: All code that needs both mutex_a and mutex_b must always lock mutex_a first and then mutex_b
-		(2) Try and back off: After locking the first mutex of some set, try to lock additional mutexes in the set. If the attempt fails, release all mutexes in the set and start again.
+		(1) Fixed lock hierarchy: All code that needs both mutex_a and mutex_b 
+		must always lock mutex_a first and then mutex_b
+		(2) Try and back off: After locking the first mutex of some set, try to 
+		lock additional mutexes in the set. If the attempt fails, release 
+		all mutexes in the set and start again.
 	
-	(3)Synchronization (i.e. cooperation between contexts) -- provides a way for different concurrent contexts to share resources in a cooperative manour that doesn't lead to state corruption
+	(3)Synchronization (i.e. cooperation between contexts) -- provides a way for 
+		different concurrent contexts to share resources in a cooperative manour 
+		that doesn't lead to state corruption
 
-Condition variables - signals a change in shared data. It allows a thread to wait on shared data that's being held by a mutex
+Condition variables - signals a change in shared data. It allows a thread to wait on 
+	shared data that's being held by a mutex
+	
 	-A conditional variable is like "full" or "empty", when looking at a queue. 
-	-A mutex may have more than one conditional variable, such as "full" and "empty", when looking at a queue
+	
+	-A mutex may have more than one conditional variable, such as "full" and "empty", 
+	when looking at a queue
 
-Concurrency (applies to uniprocesseros)- many different processes occuring serially which give the illusion of mutli-tasking 
-	-Ex; while one threading is on an I/O block, another thread can do some meaningful work (without the fear of data corruption)
+Concurrency (applies to uniprocesseros)- many different processes occuring serially which 
+	give the illusion of mutli-tasking 
+	
+	-Ex; while one threading is on an I/O block, another thread can do some meaningful 
+	work (without the fear of data corruption)
 
-Detached threads - When we know a thread won't need to join another thread, we can use the detachstate attribute to create the initial thread as "detached" 
+Detached threads - When we know a thread won't need to join another thread, we can use the
+	detachstate attribute to create the initial thread as "detached" 
+	
 	-threads take up virtual memory. detaching useless threads frees up resources
 	
-Hierarchical Locking - In the same spirit as Lock Chaining. Use it when you are pruning or balancing trees
+Hierarchical Locking - In the same spirit as Lock Chaining. Use it when you are pruning or 
+	balancing trees
 	
-Initial thread/main thread - Just as sequential programs enter through main(), thread functions also have "initial thread": 
-	(1)the initial thread can do anything that all of the other threads can do
-	(2)it determines its own thread identifier via pthread_self  
-	(3)it can terminate itself by calling pthread_exit
-	(4)can easily "evaporate" other threads running via the main thread terminating itself
+Initial thread/main thread - Just as sequential programs enter through main(), thread 
+	functions also have "initial thread": 
+		(1)the initial thread can do anything that all of the other threads can do
+		(2)it determines its own thread identifier via pthread_self  
+		(3)it can terminate itself by calling pthread_exit
+		(4)can easily "evaporate" other threads running via the main thread 
+		terminating itself
 	
-Invariants - assumptions made by a program, especially about the relationships between sets of variables
+Invariants - assumptions made by a program, especially about the relationships between 
+	sets of variables
+	
 	QUEUE PACKAGE INVARIANTS:
-		(1) The queue header must either be NULL or contain a pointer to the first queued data element 
-		(2) Each data element must contain a pointer to the first queued data element 
-		(3) Each data element must contain a pointer to the next data element, or NULL if it is the last
+		(1) The queue header must either be NULL or contain a pointer to the first
+		queued data element 
+		(2) Each data element must contain a pointer to the first queued data 
+		element. 
+		(3) Each data element must contain a pointer to the next data element, or 
+		NULL if it is the last
 
-Lock Chaining: Instead of making an entire tree one mutex, it makes more sense to make each node into a mutex. This is incredibly useful for traversing tree or linked list data structures in a memory safe way. 
+Lock Chaining: Instead of making an entire tree one mutex, it makes more sense to make 
+	each node into a mutex. This is incredibly useful for traversing tree or linked 
+	list data structures in a memory safe way. 
 
-Mutex - the primary Pthreads synchronization object. It temporarily "serialize" execution. They lock shared data so that other threads can't access it. This is necessary, as a thread may need to "temporarily" break an invariant to achieve a goal. Think of how during the heapify operation, we probably wouldn't want to do an insertion at the same time. Heapify "temporarily" breaks the heap invariant.
-	-A mutex allows for a thread to access shared data mutually exclusively of the others at a given time.
+Mutex - the primary Pthreads synchronization object. It temporarily "serialize" execution.
+	They lock shared data so that other threads can't access it. This is necessary, as
+	a thread may need to "temporarily" break an invariant to achieve a goal. Think of
+	how during the heapify operation, we probably wouldn't want to do an insertion at 
+	the same time. Heapify "temporarily" breaks the heap invariant.
+	
+	-A mutex allows for a thread to access shared data mutually exclusively of the 
+	others at a given time.
+	
 	-There are Static and Dynamic Mutex's 
-	-You can delete a mutex as soon as you are sure no threads are blocked on the mutex
+	
+	-You can delete a mutex as soon as you are sure no threads are blocked on the 
+	mutex.
+	
 	-trying to lock a locked mutex can cause an error, or cause a self-deadlock
 
-Multiple Mutex's - It's necessary to use more than one mutex when working with data structures such as trees. Multiple threads may be accessing the tree at the same time. Therefore, every node in the tree needs a mutex. Additionally, the data in the node will also require a mutex.
+Multiple Mutex's - It's necessary to use more than one mutex when working with data 
+	structures such as trees. Multiple threads may be accessing the tree at the same 
+	time. Therefore, every node in the tree needs a mutex. Additionally, the data in 
+	the node will also require a mutex.
 	
-Non-blocking mutex lock - use pthread_mutex_trylock to see if a thread is already locked. If it is, then instead of the calling thread being blocked, you can try to do some useful work elsewhere
+Non-blocking mutex lock - use pthread_mutex_trylock to see if a thread is already locked.
+	If it is, then instead of the calling thread being blocked, you can try to do some
+	useful work elsewhere
 
 Pthreads - Provides tools such as mutexes, condition variables, and thread specific data
 	
 Paralellism - many concurrent processes happening at the same time
 
-Synchronization - A way of ensuring data integrity in concurrent systems. Mutexes, condition variables, semaphores, events, and windows are tools which used to achieve synchronization
+Synchronization - A way of ensuring data integrity in concurrent systems. Mutexes, 
+	condition variables, semaphores, events, and windows are tools which used to 
+	achieve synchronization
+	
 	-Synchronizing protects your program from broken invariants
 
 Thread safe - code which can be called from multiple threads without destructive results
 
-Thread safe functions - we can make functions thread save by serializing them via a mutex lock on entry of the function and a mutex release at the return of the function
+Thread safe functions - we can make functions thread save by serializing them via a mutex 
+	lock on entry of the function and a mutex release at the return of the function
 	
-Threaded program model - functions must include explicit synchronization constructs. This makes dependencies obvious to anyone reviewing the code and makes maintenance of threaded programs generally easier than maintenance  of sequential programs
+Threaded programming model - functions must include explicit synchronization constructs. 
+	This makes dependencies obvious to anyone reviewing the code and makes maintenance
+	of threaded programs generally easier than maintenance  of sequential programs.
+	
+	COMMON MODELS: 	
+		(1) Pipeline
+		(2) Work Crew - threads work independently
+		(3) Client/Server
+		
+	-We can use a combination of these models to achieve our goal.
 
 Threaded programming overhead: 
-	(1) Synchronization is expensive. Ex: Protecting two variables which are always used together. The benefits of threaded program and parallelization stop applying if you have to
-	continuously sync data
+	(1) Synchronization is expensive. Ex: Protecting two variables which are always 
+	used together. The benefits of threaded program and parallelization stop applying 
+	if you have to continuously sync data
 	
 	(2) You have to keep track of synchronization protocols and program invariants 
 	
 	(3) You have to avoid deadlocks, data races, and priority inversions 
 	
-Thread - a stripped down version of a process. It has a pointer to the threads PC counter, a pointer to the top of the threads SP, general registers, and floating point OR address registers
-	-all threads within a process share an address space and file descriptors, including the program text and data segments
+Thread - a stripped down version of a process. It has a pointer to the threads PC counter,
+	a pointer to the top of the threads SP, general registers, and floating point OR 
+	address registers
+	
+	-all threads within a process share an address space and file descriptors, 
+	including the program text and data segments
+	
 	-all threads will have an identifier. If they don't, they are NULL. 
 	
 Thread Blocks: A thread is blocked for the following reasons: 
@@ -176,13 +262,22 @@ Thread States:
 |             | joined, it will be recycled.                                             |
 +-------------+--------------------------------------------------------------------------+
 
-Time Sliced - When a thread has been running for so long, it will be preempted by another thread so that it can have a turn. The preempted thread wil go from "running" to "ready" 
+Time Sliced - When a thread has been running for so long, it will be preempted by another 
+	thread so that it can have a turn. The preempted thread wil go from "running" to 
+	"ready" 
 	
-priority inversion - when a high-priority task is indirectly suspended because a low priority task is holding a mutex lock
+priority inversion - when a high-priority task is indirectly suspended because a low 
+	priority task is holding a mutex lock
+	
+Signal - When A thread signals a condition variable to only one thread
 
 When to use Threads: 
-	(1) Performing extensive computation that can be parallelized into multiple threads. Think matrix multiplication 
+	(1) Performing extensive computation that can be parallelized into multiple 
+	threads. Think matrix multiplication 
+	
 	(2) Performing substantial I/O which can be overlapped to improve throughput
+	
+PICK UP AT POINT 3.3.3
 	
                    
 
