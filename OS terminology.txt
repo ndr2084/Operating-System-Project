@@ -1,0 +1,137 @@
+DATA TYPES AND SUCH:
+
+pthread_create - creates an execution context i.e. a thread
+
+pthread_exit - will terminate the thread that it corresponds with
+
+pthread_t - thread identifier 
+
+pthread_mutex_t - a mutex 
+
+pthread_cond_t - condition variable 
+
+pthread_key_t - "access key" for thread-specific data 
+
+pthread_attr_t - thread attributes object 
+
+pthread_mutexattr_t - mutexc attributes object 
+
+pthread_condattr_t - conditional variable attributes object
+
+pthread_once_t - "one time initialization" control context
+
+pthread_equal - returns a non-zero value if the thread identifiers refer to the same thread, otherwise it returns 0
+
+pthread_join - when the return of this function is successful, the target thread has been terminated successfully 
+
+PHOTOS: 
+
+[1] THREAD_STATE_TRANSITIONS : shows the various states a thread can be in and the actions that correspond with each state
+
+[2] MUTEX_OPERATIONS : we see 3 threads sharing a mutex lock, and the various states that they're in. 
+
+DEFINITIONS:  
+
+Amdahl's law - the ratio that shows the speed up associated with parallel processing 
+
+Asynchronous - many things happen independently (concurrently) 
+
+Critical sections/Serial sections - we can break thread safe functions down into critical sections. This is the area where one one process should have access to it at a time to ensure data integrity. 
+
+Context switching - the caller function saves the current data of the process in a "context switcher" and performs any necessary synchronization. This is necessary when more than one thread has access to a specific region
+
+Concurrency control functions: 
+	(1)Preserving state of an object entity-- We need to be able to save the state of one context, be able to switch to another, and then switch back, all with the register contents in tact. 
+	(2)Scheduling -- Determines the sequence in which contexts will be executed, and switched to and from. 
+	
+	(3)Synchronization (i.e. cooperation between contexts) -- provides a way for different concurrent contexts to share resources in a cooperative manour that doesn't lead to state corruption
+
+Condition variables - signals a change in shared data. It allows a thread to wait on shared data that's being held by a mutex
+
+Concurrency (applies to uniprocesseros)- many different processes occuring serially which give the illusion of mutli-tasking 
+	-Ex; while one threading is on an I/O block, another thread can do some meaningful work (without the fear of data corruption)
+
+Detached threads - When we know a thread won't need to join another thread, we can use the detachstate attribute to create the initial thread as "detached" 
+	-threads take up virtual memory. detaching useless threads frees up resources
+	
+Initial thread/main thread - Just as sequential programs enter through main(), thread functions also have "initial thread": 
+	(1)the initial thread can do anything that all of the other threads can do
+	(2)it determines its own thread identifier via pthread_self  
+	(3)it can terminate itself by calling pthread_exit
+	(4)can easily "evaporate" other threads running via the main thread terminating itself
+	
+Invariants - assumptions made by a program, especially about the relationships between sets of variables
+	QUEUE PACKAGE INVARIANTS:
+		(1) The queue header must either be NULL or contain a pointer to the first queued data element 
+		(2) Each data element must contain a pointer to the first queued data element 
+		(3) Each data element must contain a pointer to the next data element, or NULL if it is the last
+
+Mutex - the primary Pthreads synchronization object. It locks shared data so that other threads can't access it. This is necessary, as a thread may need to "temporarily" break an invariant to achieve a goal. Think of how during the heapify operation, we probably wouldn't want to do an insertion at the same time. Heapify "temporarily" breaks the heap invariant.
+	-A mutex allows for a thread to access shared data mutually exclusively of the others at a given time.
+
+Pthreads - Provides tools such as mutexes, condition variables, and thread specific data
+	
+Paralellism - many concurrent processes happening at the same time
+
+Synchronization - A way of ensuring data integrity in concurrent systems. Mutexes, condition variables, semaphores, events, and windows are tools which used to achieve synchronization
+	-Synchronizing protects your program from broken invariants
+
+Thread safe - code which can be called from multiple threads without destructive results
+
+Thread safe functions - we can make functions thread save by serializing them via a mutex lock on entry of the function and a mutex release at the return of the function
+	
+Threaded program model - functions must include explicit synchronization constructs. This makes dependencies obvious to anyone reviewing the code and makes maintenance of threaded programs generally easier than maintenance  of sequential programs
+
+Threaded programming overhead: 
+	(1) Synchronization is expensive. Ex: Protecting two variables which are always used together. The benefits of threaded program and parallelization stop applying if you have to
+	continuously sync data
+	
+	(2) You have to keep track of synchronization protocols and program invariants 
+	
+	(3) You have to avoid deadlocks, data races, and priority inversions 
+	
+Thread - a stripped down version of a process. It has a pointer to the threads PC counter, a pointer to the top of the threads SP, general registers, and floating point OR address registers
+	-all threads within a process share an address space and file descriptors, including the program text and data segments
+	-all threads will have an identifier. If they don't, they are NULL. 
+	
+Thread Blocks: A thread is blocked for the following reasons: 
+	(1) it attempts to lock a mutex that is currently locked 
+	(2) it is waiting on a condition variable 
+	(3) when it attempts an I/O operation that can't be immediately completed 
+	(4) when it calls sigwait for a signal that is not currently pending
+	
+Thread States:
+________________________________________________________________________________________
+|STATE	|	MEANING									|
+|_______|_______________________________________________________________________________|
+|Ready	| The thread is able to run but is waiting for a processor.			| 
+|/////	| It may have just started, or just been unblocked, or preempted by another	|  
+|/////	| thread. 									| 
+________________________________________________________________________________________|
+|Running| The thread is currently running; there may be more than one thread if it's a 	| 
+|/////	| multiprocessor we're dealing with. 						| 
+________________________________________________________________________________________|
+|Blocked| The thread isn't able to run because it's waiting for a conditional variable,	| 
+|/////	| or a mutex lock, or an I/O operation to complex				| 
+________________________________________________________________________________________|
+|Terminated 	|The thread terminated by returning from its start function, or  	|
+|/////	    	|calling pthread_exit, or being cancelled and doing cleanup handlers.  	|
+|/////		|It was not detached, and has not yet been joined. Once detached or 	| 
+|/////		|joined it will be recycled						|
+|/////__________|_______________________________________________________________________|
+
+Time Sliced - When a thread has been running for so long, it will be preempted by another thread so that it can have a turn. The preempted thread wil go from "running" to "ready" 
+	
+priority inversion - when a high-priority task is indirectly suspended because a low priority task is holding a mutex lock
+
+When to use Threads: 
+	(1) Performing extensive computation that can be parallelized into multiple threads. Think matrix multiplication 
+	(2) Performing substantial I/O which can be overlapped to improve throughput
+	
+
+
+
+
+	
+	
+
