@@ -212,6 +212,8 @@ Threaded programming model - functions must include explicit synchronization con
 	of threaded programs generally easier than maintenance  of sequential programs.
 	
 	COMMON MODELS: 	
+	
+	
 		(1) Pipeline
 		(2) Work Crew - threads work independently
 		(3) Client/Server
