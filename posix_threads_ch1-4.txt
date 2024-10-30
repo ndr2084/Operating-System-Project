@@ -36,8 +36,13 @@ DATA TYPES AND SUCH:
 +---------------------+---------------------------------------------------------------+
 pthread_cond_signal - wakes up a single thread waiting on a conditional variable. The 
 thread will have to test its predicate to see if it should awaken
+
 pthread_cond_broadcast - wakes up all threads waiting on the conditional variable. The 
 threads will have to test all their predicates so it could be slow
+
+stage_tag - a way of representing each stage in a pipeline 
+
+pipe_tag - structure of a pipeline
 
 PHOTOS: 
 
@@ -54,6 +59,12 @@ they're in.
 	
 [5] THREAD_PROGRAMMING_MODELS : shown are the most common ways to implement a threaded 
 	program. 
+
+[6] WORK_CREW : a mode of thread programming
+
+[7] PIPELINE : a mode of thread programming
+
+[8] CLIENT_SERVER : a mode of thread programming
 
 DEFINITIONS:  
 
@@ -211,9 +222,7 @@ Threaded programming model - functions must include explicit synchronization con
 	This makes dependencies obvious to anyone reviewing the code and makes maintenance
 	of threaded programs generally easier than maintenance  of sequential programs.
 	
-	COMMON MODELS: 	
-	
-	
+	COMMON MODELS: 		
 		(1) Pipeline
 		(2) Work Crew - threads work independently
 		(3) Client/Server
@@ -271,6 +280,9 @@ Time Sliced - When a thread has been running for so long, it will be preempted b
 priority inversion - when a high-priority task is indirectly suspended because a low 
 	priority task is holding a mutex lock
 	
+pipelining - a stream of data items is processed serially by an ordered set of threads
+	EX: output = input | Thread_A | Thread_B | Thread_C
+	
 Signal - When A thread signals a condition variable to only one thread
 
 When to use Threads: 
@@ -279,8 +291,9 @@ When to use Threads:
 	
 	(2) Performing substantial I/O which can be overlapped to improve throughput
 	
-PICK UP AT POINT 3.3.3
-	
+Work crew - data is processed independently by a set of threads. 
+	EX: breaking up a large matrix down into smaller matrices for multiplication, then
+	combining the results at the very end	
                    
 
 	
